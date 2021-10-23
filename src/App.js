@@ -15,49 +15,64 @@ function Filter({ value, onChange }) {
     </>
   )
 }
+
+//toggle country,
+//new component, if collapsed,
+
+//refactor country component, - renders have some state, are we showing the expanded view
+
 function Countries({ countries }) {
-  if (countries.length === 1) {
-    return <Country country={countries} />
+  //selected country, set seletedCountry usestate
+  //if there is a selected country, then you return that country
+  const showCountryClick = (country) => {
+    return <Country country={country} />
   }
-  if (countries.length > 10) {
+
+  if (countries.length === 1) {
+    return <Country country={countries[0]} />
+  } else if (countries.length > 10) {
     return <div>Too many matches, specify another filter</div>
   }
   return (
     <>
       {countries.map((country) => (
-        <div key={country.name.common}>{country.name.common}</div>
+        <Country key={country.name.common} country={country} />
       ))}
     </>
   )
 }
 
 function Country({ country }) {
-  const languages = Object.values(country[0].languages)
+  const [expanded, setExpanded] = useState(false)
+  const languages = Object.values(country.languages)
+
+  if (expanded) {
+    return (
+      <>
+        <h2>{country.name.common}</h2>
+        <div>capital {country.capital}</div>
+        <div>population {country.population}</div>
+        <h3>languages</h3>
+        <ul>
+          {languages.map((lang) => {
+            return <li key={lang}>{lang}</li>
+          })}
+        </ul>
+        <img alt={`map of ${country.name.common}`} src={country.flags.png} />
+      </>
+    )
+  }
   return (
     <>
-      <h2>{country[0].name.common}</h2>
-      {console.log(country[0])}
-      <div>capital {country[0].capital}</div>
-      <div>population {country[0].population}</div>
-      <h3>languages</h3>
-      <ul>
-        {languages.map((lang) => {
-          return <li>{lang}</li>
-        })}
-      </ul>
-      <img
-        alt={`map of ${country[0].name.common}`}
-        src={country[0].flags.png}
-      />
+      {country.name.common}
+      <button onClick={() => setExpanded(!expanded)}>show</button>
     </>
   )
 }
 
 function App() {
   const hook = () => {
-    console.log('effect')
     const eventHandler = (response) => {
-      console.log(response)
       setCountries(response.data)
     }
     const promise = axios.get('https://restcountries.com/v3.1/all')
@@ -81,6 +96,7 @@ function App() {
   return (
     <>
       <div>
+        <div>2.13</div>
         find countries
         <Filter value={filter} onChange={handleFilterChange} />
         <Countries countries={countriesToShow} />
