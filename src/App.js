@@ -42,12 +42,57 @@ function Countries({ countries }) {
   )
 }
 
+function Weather({ weather, city }) {
+  if (!weather) {
+    return null
+  }
+
+  return (
+    <div>
+      <h3>Weather in {city}</h3>
+      <div>
+        <strong>temperature:</strong> {weather.temperature} Celcius
+      </div>
+      <img
+        src={weather.weather_icons[0]}
+        alt={weather.weather_descriptions[0]}
+      />
+      <div>
+        <strong>wind:</strong> {weather.wind_speed} mph direction{' '}
+        {weather.wind_dir}
+      </div>
+    </div>
+  )
+}
 function Country({ country }) {
+  const [weather, setWeather] = useState(null)
   const [expanded, setExpanded] = useState(false)
   const languages = Object.values(country.languages)
   const handleHideClick = () => {
     setExpanded(false)
   }
+
+  const capital = country['capital']
+
+  const fetchWeather = () => {
+    console.log('test', process.env.API_KEY)
+    axios
+      .get(
+        `http://api.weatherstack.com/current?access_key=ae75f740ed8c9e696a7e401ab3925578&query=${capital}`
+      )
+      .then((res) => {
+        console.log('res.data', res.data)
+        // return setWeather({
+        //   temperature: `${res.data.current.temperature} Celsius`,
+        //   weather_icons: res.data.current.weather_icons,
+        //   wind_speed: `${res.data.current.wind_speed} kilometers/hour`,
+        //   wind_dir: `direction ${res.data.current.wind_dir}`,
+        // })
+      })
+      .catch(() => setWeather({ temperature: 'api request failed' }))
+  }
+
+  useEffect(fetchWeather, [capital])
 
   if (expanded) {
     return (
@@ -68,6 +113,7 @@ function Country({ country }) {
             })}
           </ul>
           <img alt={`map of ${country.name.common}`} src={country.flags.png} />
+          <Weather weather={weather} city={country.capital} />
         </div>
       </>
     )
