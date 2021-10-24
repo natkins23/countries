@@ -24,9 +24,9 @@ function Filter({ value, onChange }) {
 function Countries({ countries }) {
   //selected country, set seletedCountry usestate
   //if there is a selected country, then you return that country
-  const showCountryClick = (country) => {
-    return <Country country={country} />
-  }
+  // const showCountryClick = (country) => {
+  //   return <Country country={country} />
+  // }
 
   if (countries.length === 1) {
     return <Country country={countries[0]} />
@@ -45,27 +45,39 @@ function Countries({ countries }) {
 function Country({ country }) {
   const [expanded, setExpanded] = useState(false)
   const languages = Object.values(country.languages)
+  const handleHideClick = () => {
+    setExpanded(false)
+  }
 
   if (expanded) {
     return (
       <>
-        <h2>{country.name.common}</h2>
-        <div>capital {country.capital}</div>
-        <div>population {country.population}</div>
-        <h3>languages</h3>
-        <ul>
-          {languages.map((lang) => {
-            return <li key={lang}>{lang}</li>
-          })}
-        </ul>
-        <img alt={`map of ${country.name.common}`} src={country.flags.png} />
+        <div>
+          <div>
+            <h2>
+              {country.name.common}{' '}
+              <button onClick={handleHideClick}>hide</button>
+            </h2>
+          </div>
+          <div>capital {country.capital}</div>
+          <div>population {country.population}</div>
+          <h3>languages</h3>
+          <ul>
+            {languages.map((lang) => {
+              return <li key={lang}>{lang}</li>
+            })}
+          </ul>
+          <img alt={`map of ${country.name.common}`} src={country.flags.png} />
+        </div>
       </>
     )
   }
   return (
     <>
-      {country.name.common}
-      <button onClick={() => setExpanded(!expanded)}>show</button>
+      <div>
+        {country.name.common}
+        <button onClick={() => setExpanded(!expanded)}>show</button>
+      </div>
     </>
   )
 }
@@ -87,7 +99,7 @@ function App() {
   const [filter, setFilter] = useState('')
 
   const countriesToShow = countries.filter((country) =>
-    country.name.common.toLowerCase().includes(filter)
+    country.name.common.toLowerCase().includes(filter.toLowerCase())
   )
 
   const handleFilterChange = (event) => {
