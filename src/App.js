@@ -15,31 +15,30 @@ function Filter({ value, onChange }) {
     </>
   )
 }
+//whats happening
+//i'm displaying counties, which returns a <Country /> component for every country that fits the filter
+//
 
-//toggle country,
-//new component, if collapsed,
-
-//refactor country component, - renders have some state, are we showing the expanded view
+//does the component rerender when the prop is updated. should be yes, check
+//tend to more less state,
+//When do componenets rerender: React components automatically re-render whenever there is a change in their state or props
 
 function Countries({ countries }) {
-  //selected country, set seletedCountry usestate
-  //if there is a selected country, then you return that country
-  // const showCountryClick = (country) => {
-  //   return <Country country={country} />
-  // }
-
-  if (countries.length === 1) {
-    return <Country country={countries[0]} />
-  } else if (countries.length > 10) {
+  console.log('countries arr', countries, 'len is', countries.length)
+  if (countries.length > 10) {
     return <div>Too many matches, specify another filter</div>
   }
-  return (
-    <>
-      {countries.map((country) => (
-        <Country key={country.name.common} country={country} />
-      ))}
-    </>
-  )
+
+  const test = (country) => {
+    return (
+      <Country
+        key={country.name.common}
+        country={country}
+        isOnlyCountry={countries.length === 1}
+      />
+    )
+  }
+  return <>{countries.map((country) => test(country))}</>
 }
 
 function Weather({ weather, city }) {
@@ -64,35 +63,32 @@ function Weather({ weather, city }) {
     </div>
   )
 }
-function Country({ country }) {
-  const [weather, setWeather] = useState(null)
-  const [expanded, setExpanded] = useState(false)
+
+//different renders vs rerenders
+
+//write a use effect as the only value in the dependney array, and set expanded as isonly
+function Country({ country, isOnlyCountry }) {
+  console.log('country', country.name.common)
+  console.log('isOnlyCountry', isOnlyCountry)
+  // const [weather, setWeather] = useState(null)
+  const [expanded, setExpanded] = useState(isOnlyCountry)
+  console.log('is expanded', expanded)
+
   const languages = Object.values(country.languages)
   const handleHideClick = () => {
     setExpanded(false)
   }
 
-  const capital = country['capital']
+  useEffect(() => setExpanded(isOnlyCountry), [isOnlyCountry])
+  // const api_key = process.env.API_KEY
+  // console.log(process.env)
+  // const url = `http://api.weatherstack.com/current?access_key=${api_key}&query=${country.capital}`
 
-  const fetchWeather = () => {
-    console.log('test', process.env.API_KEY)
-    axios
-      .get(
-        `http://api.weatherstack.com/current?access_key=ae75f740ed8c9e696a7e401ab3925578&query=${capital}`
-      )
-      .then((res) => {
-        console.log('res.data', res.data)
-        // return setWeather({
-        //   temperature: `${res.data.current.temperature} Celsius`,
-        //   weather_icons: res.data.current.weather_icons,
-        //   wind_speed: `${res.data.current.wind_speed} kilometers/hour`,
-        //   wind_dir: `direction ${res.data.current.wind_dir}`,
-        // })
-      })
-      .catch(() => setWeather({ temperature: 'api request failed' }))
-  }
-
-  useEffect(fetchWeather, [capital])
+  // useEffect(() => {
+  //   axios.get(url).then((response) => {
+  //     setWeather(response.data.current)
+  //   })
+  // }, [])
 
   if (expanded) {
     return (
@@ -113,7 +109,7 @@ function Country({ country }) {
             })}
           </ul>
           <img alt={`map of ${country.name.common}`} src={country.flags.png} />
-          <Weather weather={weather} city={country.capital} />
+          {/*<Weather weather={weather} city={country.capital} />*/}
         </div>
       </>
     )
