@@ -4,8 +4,6 @@ import axios from 'axios'
 /* 2.12 - countries- what do i have to do
 1) i have to create an input feild that filters 
 2) i have to list country name from a json format
-
-
 */
 
 function Filter({ value, onChange }) {
@@ -213,7 +211,7 @@ function App() {
   return (
     <>
       <div>
-        <div>2.13 alt</div>
+        <div>2.14</div>
         find countries
         <Filter value={filter} onChange={handleFilterChange} />
         <CountryList
