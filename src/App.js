@@ -50,29 +50,10 @@ function Weather({ weather, city }) {
 2) to work around this you use a useEffect that updates the state, setting the dependency array to be the value that changes
 3) components rerender on prop or state changes
 4) need to think about what the components see, I needed the component to be able to see that there was only one country, and if i shared that info to the Country component, it would be easy.  
+  //use effects cant be inside a conditional
+
 
 */
-
-//question: what do i want to happen in the case where there is only one country, the filter changes, rerenders the list and so the country is rerenderd with a different prop value for isOnlyCountry.
-//i would for a country to remember if its been expanded in a list
-
-//different renders vs rerenders
-
-//write a use effect as the only value in the dependney array, and set expanded as isonly
-
-//the country will be expanded when either the user clicks to expand it, or its the only country.
-
-//what i want
-//if its the only country, then expand every time
-//Q? does only country need its own state?
-//brainstorm
-//yes---countryList updates when its countries prop changes, but a change in prop would not affect the state of onlycountry(if this was a state) in the rerendering of countrylist, so if the default state for only country was countries.lenght ===1, if the typed filter resulting in a countrylist where there were more than one country, then the countryList onlycountry state would always be the same, unless there was a useEffect.
-// could i make a use effect to work around this.
-
-//
-
-//if its not the only country, the expanded or contracted state of a country should depend on the expanded state
-
 //use effect note:
 //each use effect block should be as specific as possible
 
@@ -86,8 +67,6 @@ function CountryList({ countries, expandedSet, updateExpandedSet }) {
   }
 
   const deleteCountry = (countryName) => {
-    console.log('hidden clicked')
-    console.log(expandedSet, 'and', countryName)
     expandedSet.delete(countryName)
     updateExpandedSet((expandedSet) => {
       expandedSet.delete(countryName)
@@ -96,8 +75,6 @@ function CountryList({ countries, expandedSet, updateExpandedSet }) {
     })
   }
   const addCountry = (countryName) => {
-    console.log('expanded')
-    console.log(expandedSet, 'and', countryName)
     updateExpandedSet((expandedSet) => {
       const newSet = new Set(expandedSet.add(countryName))
       return newSet
@@ -107,14 +84,12 @@ function CountryList({ countries, expandedSet, updateExpandedSet }) {
   return (
     <>
       {countries.map((country) => {
-        console.log(country.name.common)
         return (
           <Country
             key={country.name.common}
             country={country}
             onlyCountry={onlyCountry}
             isExpanded={expandedSet.has(country.name.common)}
-            //is there a way to add the countryName to the function so all i have to do is call addToExpanded?
             deleteFromExpanded={deleteCountry}
             addToExpanded={addCountry}
           />
@@ -131,25 +106,22 @@ function Country({
   addToExpanded,
   deleteFromExpanded,
 }) {
-  // const [weather, setWeather] = useState(null)
-  console.log(country.name.common, 'is expanded', isExpanded)
+  const [weather, setWeather] = useState(null)
 
   const languages = Object.values(country.languages)
   const handleHideClick = () => {
     deleteFromExpanded(country.name.common)
   }
-  //use effects cant be inside a conditional
-  //how do i have a use effect that updates if expanded
 
-  // const api_key = process.env.API_KEY
-  // console.log(process.env)
-  // const url = `http://api.weatherstack.com/current?access_key=${api_key}&query=${country.capital}`
+  const api_key = process.env.REACT_APP_API_KEY
+  const url = `http://api.weatherstack.com/current?access_key=${api_key}&query=${country.capital}`
 
-  // useEffect(() => {
-  //   axios.get(url).then((response) => {
-  //     setWeather(response.data.current)
-  //   })
-  // }, [])
+  useEffect(() => {
+    axios.get(url).then((response) => {
+      setWeather(response.data.current)
+    })
+  }, [url])
+
   if (onlyCountry) {
     return (
       <>
@@ -166,7 +138,7 @@ function Country({
             })}
           </ul>
           <img alt={`map of ${country.name.common}`} src={country.flags.png} />
-          {/*<Weather weather={weather} city={country.capital} />*/}
+          <Weather weather={weather} city={country.capital} />
         </div>
       </>
     )
@@ -189,7 +161,7 @@ function Country({
             })}
           </ul>
           <img alt={`map of ${country.name.common}`} src={country.flags.png} />
-          {/*<Weather weather={weather} city={country.capital} />*/}
+          <Weather weather={weather} city={country.capital} />
         </div>
       </>
     )
@@ -227,10 +199,8 @@ function App() {
 
   useEffect(hook, [])
 
-  //array of country objects
   const [countries, setCountries] = useState([])
   const [filter, setFilter] = useState('')
-  //this needs to be a set
   const [expandedSet, setExpandedSet] = useState(new Set())
 
   const countriesToShow = countries.filter((country) =>
@@ -240,8 +210,6 @@ function App() {
   const handleFilterChange = (event) => {
     setFilter(event.target.value)
   }
-  // const copyExpandedSet = new Set(expandedSet)
-  // console.log(copyExpandedSet)
   return (
     <>
       <div>
